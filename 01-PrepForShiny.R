@@ -9,6 +9,13 @@ library(lubridate)
 
 myGame <- filter(Game, GameID == myGameId)
 myRace <- filter(Race, GameID == myGameId, NPR == 0)
+mySystems <- filter(RaceSysSurvey, RaceID == myRace$RaceID) %>%
+  inner_join(System) %>%
+  select(SystemID, Name, ControlRaceID, SectorID,
+         Discovered, SurveyDone, GeoSurveyDone,
+         FixedName, Age, Stars)
+
+myPopulatedSystems <- select(inner_join(SystemPopulations, mySystems),SystemID, TotalPopulation)
 myHomeSysID <- arrange(myPopulatedSystems,desc(TotalPopulation))$SystemID[1]
 myCurrentDate <- {
   elapse_y <- myGame$GameTime / (60*60*24*30*12)
@@ -22,11 +29,7 @@ myCurrentDate <- {
       hours(floor(elapse_h)) +
       minutes(floor(elapse_m))}
 
-mySystems <- filter(RaceSysSurvey, RaceID == myRace$RaceID) %>%
-  inner_join(System) %>%
-  select(SystemID, Name, ControlRaceID, SectorID,
-         Discovered, SurveyDone, GeoSurveyDone,
-         FixedName, Age, Stars)
+
 
 myWarpPairs <- select(mutate(WarpPoint, JG = as.logical(JumpGateRaceID)),
                     SP = WarpPointID, DP = WPLink, SS = SystemID, JG) %>%
